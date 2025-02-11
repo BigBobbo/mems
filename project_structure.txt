@@ -1,0 +1,25 @@
+memorial_site/
+├── app/
+│   ├── __init__.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── user.py
+│   │   ├── memorial.py
+│   │   ├── tribute.py
+│   │   └── event.py
+│   ├── routes/
+│   │   ├── __init__.py
+│   │   ├── auth.py
+│   │   ├── memorial.py
+│   │   └── admin.py
+│   ├── templates/
+│   │   ├── base.html
+│   │   ├── auth/
+│   │   └── memorial/
+│   └── static/
+│       ├── css/
+│       ├── js/
+│       └── img/
+├── config.py
+├── requirements.txt
+└── run.py 

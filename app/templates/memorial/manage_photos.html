@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Photos - {{ memorial.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Manage Photos for {{ memorial.name }}</h2>
+            <a href="{{ url_for('memorial.view', id=memorial.id) }}" class="btn btn-secondary">Back to Memorial</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Upload New Photo</h5>
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="photo" class="form-label">Choose Photo</label>
+                            <input type="file" class="form-control" id="photo" name="photo" accept="image/*" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="caption" class="form-label">Caption</label>
+                            <input type="text" class="form-control" id="caption" name="caption">
+                        </div>
+                        <div class="mb-3">
+                            <label for="date_taken" class="form-label">Date Taken</label>
+                            <input type="date" class="form-control" id="date_taken" name="date_taken">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Photo Gallery</h5>
+                    <div class="row photo-gallery" data-memorial-id="{{ memorial.id }}">
+                        {% for photo in memorial.photos.order_by(Photo.display_order).all() %}
+                        <div class="col-md-4 mb-3" data-photo-id="{{ photo.id }}">
+                            <div class="card">
+                                <div class="card-header handle">
+                                    <i class="fas fa-grip-lines"></i>
+                                </div>
+                                <img src="{{ url_for('static', filename='uploads/' + memorial.id|string + '/' + photo.filename) }}" 
+                                     class="card-img-top" alt="{{ photo.caption or 'Memorial photo' }}">
+                                <div class="card-body">
+                                    {% if photo.caption %}
+                                    <p class="card-text">{{ photo.caption }}</p>
+                                    {% endif %}
+                                    {% if photo.date_taken %}
+                                    <small class="text-muted d-block">
+                                        Taken: {{ photo.date_taken.strftime('%B %d, %Y') }}
+                                    </small>
+                                    {% endif %}
+                                    <div class="btn-group mt-2 w-100" role="group">
+                                        <form method="POST" 
+                                              action="{{ url_for('memorial.set_profile_photo', id=memorial.id, photo_id=photo.id) }}"
+                                              class="d-inline">
+                                            <button type="submit" class="btn btn-outline-primary btn-sm" 
+                                                    {% if photo.is_profile %}disabled{% endif %}>
+                                                {% if photo.is_profile %}
+                                                    <i class="fas fa-star"></i> Profile Photo
+                                                {% else %}
+                                                    <i class="far fa-star"></i> Set as Profile
+                                                {% endif %}
+                                            </button>
+                                        </form>
+                                        <form method="POST" 
+                                              action="{{ url_for('memorial.delete_photo', id=memorial.id, photo_id=photo.id) }}"
+                                              class="d-inline">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" 
+                                                    onclick="return confirm('Are you sure you want to delete this photo?')">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const gallery = document.querySelector('.photo-gallery');
+    const memorialId = gallery.dataset.memorialId;
+    
+    new Sortable(gallery, {
+        animation: 150,
+        handle: '.handle',
+        ghostClass: 'sortable-ghost',
+        onEnd: function (evt) {
+            const photoId = evt.item.dataset.photoId;
+            const newPosition = evt.newIndex;
+            
+            fetch(`/memorial/${memorialId}/photo/${photoId}/reorder`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `position=${newPosition}`
+            }).then(response => {
+                if (!response.ok) {
+                    console.error('Error reordering photos');
+                }
+            });
+        }
+    });
+});
+</script>
+
+<style>
+.handle {
+    cursor: move;
+    background-color: #f8f9fa;
+    text-align: center;
+    padding: 0.25rem;
+}
+.sortable-ghost {
+    opacity: 0.5;
+}
+.photo-gallery .card {
+    transition: transform 0.2s;
+}
+.photo-gallery .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %} 

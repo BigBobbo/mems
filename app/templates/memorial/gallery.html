@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Photo Gallery - {{ memorial.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Photo Gallery</h2>
+            <a href="{{ url_for('memorial.view', id=memorial.id) }}" class="btn btn-secondary">Back to Memorial</a>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for photo in memorial.photos.order_by(Photo.display_order).all() %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <img src="{{ url_for('static', filename='uploads/' + memorial.id|string + '/' + photo.filename) }}" 
+                     class="card-img-top gallery-img" 
+                     alt="{{ photo.caption or 'Memorial photo' }}"
+                     data-bs-toggle="modal" 
+                     data-bs-target="#photoModal{{ photo.id }}">
+                {% if photo.caption or photo.date_taken %}
+                <div class="card-body">
+                    {% if photo.caption %}
+                    <p class="card-text">{{ photo.caption }}</p>
+                    {% endif %}
+                    {% if photo.date_taken %}
+                    <small class="text-muted">
+                        Taken: {{ photo.date_taken.strftime('%B %d, %Y') }}
+                    </small>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Modal for full-size photo -->
+        <div class="modal fade" id="photoModal{{ photo.id }}" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ photo.caption or 'Memorial Photo' }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img src="{{ url_for('static', filename='uploads/' + memorial.id|string + '/' + photo.filename) }}" 
+                             class="img-fluid" alt="{{ photo.caption or 'Memorial photo' }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.gallery-img {
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+.gallery-img:hover {
+    opacity: 0.9;
+}
+</style>
+{% endblock %} 

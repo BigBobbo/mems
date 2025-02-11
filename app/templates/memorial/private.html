@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Private Memorial{% endblock %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <h2>Private Memorial</h2>
+    <p class="lead">This memorial is private and requires permission to view.</p>
+    {% if not current_user.is_authenticated %}
+        <p>Please <a href="{{ url_for('auth.login') }}">login</a> to request access.</p>
+    {% endif %}
+</div>
+{% endblock %} 

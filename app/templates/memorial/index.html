@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <h1>Welcome to Memorial Site</h1>
+    
+    {% if memorials %}
+        <div class="row">
+            {% for memorial in memorials %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ memorial.name }}</h5>
+                            <p class="card-text">
+                                {{ memorial.birth_date.strftime('%Y-%m-%d') }} - 
+                                {{ memorial.death_date.strftime('%Y-%m-%d') }}
+                            </p>
+                            <a href="{{ url_for('memorial.view', id=memorial.id) }}" 
+                               class="btn btn-primary">View Memorial</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No public memorials available.</p>
+    {% endif %}
+{% endblock %} 

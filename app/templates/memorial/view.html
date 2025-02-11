@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}{{ memorial.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>{{ memorial.name }}</h1>
+            <p class="text-muted">
+                {{ memorial.birth_date.strftime('%B %d, %Y') }} - 
+                {{ memorial.death_date.strftime('%B %d, %Y') }}
+            </p>
+        </div>
+        {% if current_user.is_authenticated and current_user.id == memorial.creator_id %}
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('memorial.edit', id=memorial.id) }}" class="btn btn-secondary">Edit Memorial</a>
+            <a href="{{ url_for('memorial.manage_tributes', id=memorial.id) }}" 
+               class="btn btn-outline-secondary">Manage Tributes</a>
+            <a href="{{ url_for('memorial.manage_photos', id=memorial.id) }}" 
+               class="btn btn-outline-secondary">Manage Photos</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Biography</h5>
+                    <p class="card-text">{{ memorial.biography }}</p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Tributes</h5>
+                    {% if memorial.tributes.filter_by(is_approved=True).all() %}
+                        {% for tribute in memorial.tributes.filter_by(is_approved=True) %}
+                        <div class="mb-3">
+                            <p class="mb-1">{{ tribute.content }}</p>
+                            <small class="text-muted">
+                                - {{ tribute.author.username }} 
+                                ({{ tribute.created_at.strftime('%B %d, %Y') }})
+                            </small>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No tributes yet. Be the first to share a memory.</p>
+                    {% endif %}
+                    
+                    {% if current_user.is_authenticated %}
+                    <form method="POST" action="{{ url_for('memorial.add_tribute', id=memorial.id) }}" class="mt-3">
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Share your memory</label>
+                            <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Tribute</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            {% if memorial.events.all() %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Upcoming Events</h5>
+                    {% for event in memorial.events %}
+                    <div class="mb-3">
+                        <h6>{{ event.title }}</h6>
+                        <p class="mb-1">{{ event.description }}</p>
+                        <small class="text-muted">
+                            {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}<br>
+                            {{ event.location }}
+                        </small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Photos</h5>
+                    {% if memorial.photos.first() %}
+                        {% set profile_photo = memorial.photos.filter_by(is_profile=True).first() or memorial.photos.first() %}
+                        <img src="{{ url_for('static', filename='uploads/' + memorial.id|string + '/' + profile_photo.filename) }}" 
+                             class="img-fluid mb-3" alt="Profile photo">
+                        <a href="{{ url_for('memorial.view_gallery', id=memorial.id) }}" 
+                           class="btn btn-outline-primary btn-block">View Photo Gallery</a>
+                    {% else %}
+                        <p>No photos uploaded yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
