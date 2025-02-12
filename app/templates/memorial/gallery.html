@@ -12,24 +12,18 @@
     </div>
 
     <div class="row">
-        {% for photo in memorial.photos.order_by(Photo.display_order).all() %}
+        {% for photo in memorial.photos %}
         <div class="col-md-4 mb-4">
             <div class="card">
-                <img src="{{ url_for('static', filename='uploads/' + memorial.id|string + '/' + photo.filename) }}" 
-                     class="card-img-top gallery-img" 
-                     alt="{{ photo.caption or 'Memorial photo' }}"
+                <img src="{{ storage.get_file_url(memorial.id, photo.filename) }}" 
+                     class="card-img-top" 
+                     alt="{{ photo.caption or memorial.name }}"
                      data-bs-toggle="modal" 
-                     data-bs-target="#photoModal{{ photo.id }}">
-                {% if photo.caption or photo.date_taken %}
+                     data-bs-target="#photoModal{{ photo.id }}"
+                     onerror="console.log('Image failed to load:', this.src)">
+                {% if photo.caption %}
                 <div class="card-body">
-                    {% if photo.caption %}
                     <p class="card-text">{{ photo.caption }}</p>
-                    {% endif %}
-                    {% if photo.date_taken %}
-                    <small class="text-muted">
-                        Taken: {{ photo.date_taken.strftime('%B %d, %Y') }}
-                    </small>
-                    {% endif %}
                 </div>
                 {% endif %}
             </div>
@@ -44,7 +38,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body text-center">
-                        <img src="{{ url_for('static', filename='uploads/' + memorial.id|string + '/' + photo.filename) }}" 
+                        <img src="{{ storage.get_file_url(memorial.id, photo.filename) }}" 
                              class="img-fluid" alt="{{ photo.caption or 'Memorial photo' }}">
                     </div>
                 </div>

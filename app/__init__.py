@@ -4,6 +4,7 @@ from flask_login import LoginManager
 from flask_mail import Mail
 from flask_migrate import Migrate
 from config import Config
+from app.utils.storage import S3Storage
 import os
 
 db = SQLAlchemy()
@@ -14,6 +15,14 @@ mail = Mail()
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+
+    # Initialize storage
+    storage = S3Storage()
+    
+    # Make storage available in templates
+    @app.context_processor
+    def utility_processor():
+        return {'storage': storage}
 
     # Create upload directory
     if not os.path.exists(app.config['UPLOAD_FOLDER']):

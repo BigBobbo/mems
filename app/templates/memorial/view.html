@@ -107,8 +107,17 @@
                     <h5 class="card-title">Photos</h5>
                     {% if memorial.photos.first() %}
                         {% set profile_photo = memorial.photos.filter_by(is_profile=True).first() or memorial.photos.first() %}
-                        <img src="{{ url_for('static', filename='uploads/' + memorial.id|string + '/' + profile_photo.filename) }}" 
-                             class="img-fluid mb-3" alt="Profile photo">
+                        {% if profile_photo %}
+                            <div class="text-muted small mb-2">
+                                Memorial ID: {{ memorial.id }}<br>
+                                Filename: {{ profile_photo.filename }}<br>
+                                URL: {{ storage.get_file_url(memorial.id, profile_photo.filename) }}
+                            </div>
+                            <img src="{{ storage.get_file_url(memorial.id, profile_photo.filename) }}" 
+                                 class="img-fluid mb-3" 
+                                 alt="{{ memorial.name }}"
+                                 onerror="this.onerror=null; console.error('Failed to load image:', this.src); this.classList.add('border', 'border-danger');">
+                        {% endif %}
                         <a href="{{ url_for('memorial.view_gallery', id=memorial.id) }}" 
                            class="btn btn-outline-primary btn-block">View Photo Gallery</a>
                     {% else %}

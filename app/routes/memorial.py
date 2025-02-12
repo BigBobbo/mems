@@ -9,8 +9,11 @@ import os
 from werkzeug.utils import secure_filename
 from app.utils.qr import generate_memorial_qr
 from app.models.theme import Theme
+from app.utils.storage import S3Storage
 
 bp = Blueprint('memorial', __name__)
+
+storage = S3Storage()
 
 @bp.route('/')
 def index():
@@ -312,5 +315,41 @@ def generate_qr(id):
     return render_template('memorial/qr.html', 
                          memorial=memorial,
                          qr_filename=qr_filename)
+
+@bp.route('/memorial/<int:id>/upload', methods=['POST'])
+@login_required
+def upload_photo(id):
+    memorial = Memorial.query.get_or_404(id)
+    if current_user.id != memorial.creator_id:
+        abort(403)
+        
+    if 'photo' not in request.files:
+        flash('No file uploaded', 'error')
+        return redirect(url_for('memorial.edit', id=id))
+        
+    file = request.files['photo']
+    if file.filename == '':
+        flash('No file selected', 'error')
+        return redirect(url_for('memorial.edit', id=id))
+        
+    if file and allowed_file(file.filename):
+        try:
+            filename = storage.upload_file(file, memorial.id, file.filename)
+            if filename:
+                photo = Photo(
+                    filename=filename,
+                    memorial_id=memorial.id,
+                    is_profile=request.form.get('is_profile', False) == 'true'
+                )
+                db.session.add(photo)
+                db.session.commit()
+                flash('Photo uploaded successfully', 'success')
+            else:
+                flash('Error uploading photo', 'error')
+        except Exception as e:
+            current_app.logger.error(f"Upload error: {e}")
+            flash('Error uploading photo', 'error')
+            
+    return redirect(url_for('memorial.edit', id=id))
 
 # Routes will be added here 
