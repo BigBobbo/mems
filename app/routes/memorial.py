@@ -20,7 +20,7 @@ def view(id):
     memorial = Memorial.query.get_or_404(id)
     if not memorial.is_public:
         return render_template('memorial/private.html')
-    return render_template('memorial/view.html', memorial=memorial)
+    return render_template('memorial/view.html', memorial=memorial, now=datetime.utcnow())
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required

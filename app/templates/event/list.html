@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Events - {{ memorial.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Events for {{ memorial.name }}</h2>
+            {% if current_user.is_authenticated and current_user.id == memorial.creator_id %}
+            <a href="{{ url_for('event.create_event', memorial_id=memorial.id) }}" 
+               class="btn btn-primary">Create New Event</a>
+            {% endif %}
+            <a href="{{ url_for('memorial.view', id=memorial.id) }}" 
+               class="btn btn-secondary">Back to Memorial</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            {% set upcoming_events = memorial.events|selectattr('date', 'ge', now)|list %}
+            {% set past_events = memorial.events|selectattr('date', 'lt', now)|list %}
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Upcoming Events</h5>
+                    {% if upcoming_events %}
+                        {% for event in upcoming_events|sort(attribute='date') %}
+                        <div class="event-card mb-3 p-3 border rounded">
+                            <h5>
+                                <a href="{{ url_for('event.view_event', memorial_id=memorial.id, event_id=event.id) }}" 
+                                   class="text-decoration-none">{{ event.title }}</a>
+                            </h5>
+                            <p class="mb-2">{{ event.description|truncate(150) }}</p>
+                            <div class="text-muted">
+                                <small>
+                                    <i class="fas fa-calendar"></i> 
+                                    {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}
+                                    {% if event.end_date %}
+                                        - {{ event.end_date.strftime('%B %d, %Y at %I:%M %p') }}
+                                    {% endif %}
+                                </small><br>
+                                {% if event.is_online %}
+                                <small><i class="fas fa-video"></i> Online Event</small>
+                                {% else %}
+                                <small><i class="fas fa-map-marker-alt"></i> {{ event.location }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No upcoming events scheduled.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if past_events %}
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Past Events</h5>
+                    {% for event in past_events|sort(attribute='date', reverse=true) %}
+                    <div class="event-card mb-3 p-3 border rounded">
+                        <h5>
+                            <a href="{{ url_for('event.view_event', memorial_id=memorial.id, event_id=event.id) }}" 
+                               class="text-decoration-none text-muted">{{ event.title }}</a>
+                        </h5>
+                        <p class="mb-2 text-muted">{{ event.description|truncate(150) }}</p>
+                        <div class="text-muted">
+                            <small>
+                                <i class="fas fa-calendar"></i> 
+                                {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Calendar</h5>
+                    <p class="text-muted">Calendar integration coming soon...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.event-card {
+    transition: transform 0.2s;
+    background-color: #fff;
+}
+.event-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %} 

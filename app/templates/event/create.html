@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Create Event - {{ memorial.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h2>Create New Event</h2>
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Event Title</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="date" name="date" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="time" class="form-label">Start Time</label>
+                        <input type="time" class="form-control" id="time" name="time" required>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="end_date" class="form-label">End Date (Optional)</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="end_time" class="form-label">End Time</label>
+                        <input type="time" class="form-control" id="end_time" name="end_time">
+                    </div>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="is_online" name="is_online">
+                    <label class="form-check-label" for="is_online">This is an online event</label>
+                </div>
+
+                <div class="mb-3" id="location_field">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" class="form-control" id="location" name="location">
+                </div>
+
+                <div class="mb-3" id="online_link_field" style="display: none;">
+                    <label for="online_link" class="form-label">Online Meeting Link</label>
+                    <input type="url" class="form-control" id="online_link" name="online_link" 
+                           placeholder="https://zoom.us/...">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create Event</button>
+                <a href="{{ url_for('event.list_events', memorial_id=memorial.id) }}" 
+                   class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('is_online').addEventListener('change', function() {
+    const locationField = document.getElementById('location_field');
+    const onlineLinkField = document.getElementById('online_link_field');
+    
+    if (this.checked) {
+        locationField.style.display = 'none';
+        onlineLinkField.style.display = 'block';
+    } else {
+        locationField.style.display = 'block';
+        onlineLinkField.style.display = 'none';
+    }
+});
+</script>
+{% endblock %} 

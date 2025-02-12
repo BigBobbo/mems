@@ -19,6 +19,8 @@
                class="btn btn-outline-secondary">Manage Tributes</a>
             <a href="{{ url_for('memorial.manage_photos', id=memorial.id) }}" 
                class="btn btn-outline-secondary">Manage Photos</a>
+            <a href="{{ url_for('event.list_events', memorial_id=memorial.id) }}" 
+               class="btn btn-outline-secondary">Manage Events</a>
         </div>
         {% endif %}
     </div>
@@ -64,19 +66,34 @@
 
         <div class="col-md-4">
             {% if memorial.events.all() %}
+            {% set upcoming_events = memorial.events|selectattr('date', 'ge', now)|list %}
             <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">Upcoming Events</h5>
-                    {% for event in memorial.events %}
-                    <div class="mb-3">
-                        <h6>{{ event.title }}</h6>
-                        <p class="mb-1">{{ event.description }}</p>
-                        <small class="text-muted">
-                            {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}<br>
-                            {{ event.location }}
-                        </small>
-                    </div>
-                    {% endfor %}
+                    {% if upcoming_events %}
+                        {% for event in upcoming_events|sort(attribute='date')|slice(0, 3) %}
+                        <div class="mb-3">
+                            <h6>
+                                <a href="{{ url_for('event.view_event', memorial_id=memorial.id, event_id=event.id) }}" 
+                                   class="text-decoration-none">{{ event.title }}</a>
+                            </h6>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar"></i> 
+                                {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}
+                            </small>
+                        </div>
+                        {% endfor %}
+                        {% if upcoming_events|length > 3 %}
+                            <a href="{{ url_for('event.list_events', memorial_id=memorial.id) }}" 
+                               class="btn btn-outline-primary btn-sm">View All Events</a>
+                        {% endif %}
+                    {% else %}
+                        <p>No upcoming events scheduled.</p>
+                    {% endif %}
+                    {% if current_user.is_authenticated and current_user.id == memorial.creator_id %}
+                        <a href="{{ url_for('event.create_event', memorial_id=memorial.id) }}" 
+                           class="btn btn-outline-primary btn-sm mt-2">Create Event</a>
+                    {% endif %}
                 </div>
             </div>
             {% endif %}

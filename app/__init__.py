@@ -21,14 +21,26 @@ def create_app(config_class=Config):
     login_manager.init_app(app)
     mail.init_app(app)
 
+    # Add custom Jinja filters
+    @app.template_filter('slice')
+    def slice_filter(iterable, start, end):
+        return list(iterable)[start:end]
+
+    @app.template_filter('nl2br')
+    def nl2br_filter(text):
+        if not text:
+            return ""
+        return text.replace('\n', '<br>')
+
     login_manager.login_view = 'auth.login'
     login_manager.login_message_category = 'info'
 
     # Register blueprints
-    from app.routes import auth, memorial, admin
+    from app.routes import auth, memorial, admin, event
     app.register_blueprint(auth.bp)
     app.register_blueprint(memorial.bp)
     app.register_blueprint(admin.bp)
+    app.register_blueprint(event.bp)
 
     # Create database tables
     with app.app_context():
