@@ -7,8 +7,8 @@ services:
     envVars:
       - key: FLASK_APP
         value: app
-      - key: FLASK_ENV
-        value: production
+      - key: FLASK_DEBUG
+        value: "0"
       - key: PYTHON_VERSION
         value: 3.9.16
       - key: SECRET_KEY
