@@ -27,13 +27,13 @@ def view(id):
         if current_user.id != memorial.creator_id:
             abort(403)
     
-    # Use theme-specific template if available
+    # Use theme-specific template if available, otherwise use classic theme
     if memorial.theme:
-        print(f"Using theme template: {memorial.theme.template_path}")  # Debug log
+        print(f"Using theme template: {memorial.theme.template_path}")
         template = memorial.theme.template_path
     else:
-        print("Using default template")  # Debug log
-        template = 'memorial/view.html'
+        print("Using default classic theme")
+        template = 'themes/classic/memorial.html'
         
     return render_template(template, 
                          memorial=memorial, 

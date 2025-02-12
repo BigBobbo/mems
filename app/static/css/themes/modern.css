@@ -133,4 +133,25 @@
         width: 100%;
         margin: 0.25rem 0;
     }
+}
+
+.memorial-modern .profile-photo {
+    margin: 0 auto 2rem;
+    width: 200px;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 50%;
+    box-shadow: var(--shadow-md);
+    border: 4px solid var(--neutral-100);
+}
+
+.memorial-modern .profile-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.memorial-modern .profile-photo:hover img {
+    transform: scale(1.05);
 } 

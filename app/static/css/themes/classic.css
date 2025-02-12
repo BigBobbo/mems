@@ -153,4 +153,38 @@
         width: 100%;
         margin: 0.25rem 0;
     }
+}
+
+.memorial-classic .profile-photo {
+    margin: 0 auto 2.5rem;
+    width: 220px;
+    height: 220px;
+    overflow: hidden;
+    border-radius: 50%;
+    box-shadow: var(--shadow-md);
+    border: 8px solid var(--neutral-100);
+    position: relative;
+}
+
+.memorial-classic .profile-photo:after {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: -12px;
+    right: -12px;
+    bottom: -12px;
+    border: 1px solid var(--accent-warm);
+    border-radius: 50%;
+    opacity: 0.5;
+}
+
+.memorial-classic .profile-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.memorial-classic .profile-photo:hover img {
+    transform: scale(1.05);
 } 

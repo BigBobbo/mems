@@ -8,6 +8,12 @@
 {% block content %}
 <div class="memorial-modern {% if memorial.layout == 'full-width' %}container-fluid{% elif memorial.layout == 'compact' %}container-sm{% else %}container{% endif %}">
     <div class="memorial-header">
+        {% if memorial.photos.filter_by(is_profile=True).first() %}
+        <div class="profile-photo">
+            <img src="{{ url_for('static', filename='uploads/' ~ memorial.id ~ '/' ~ memorial.photos.filter_by(is_profile=True).first().filename) }}" 
+                 alt="{{ memorial.name }}" class="img-fluid rounded-circle">
+        </div>
+        {% endif %}
         <h1 class="memorial-name">{{ memorial.name }}</h1>
         <p class="memorial-dates">
             {{ memorial.birth_date.strftime('%B %d, %Y') }} - 
