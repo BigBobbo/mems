@@ -12,6 +12,8 @@ class Memorial(db.Model):
     access_code = db.Column(db.String(20))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    theme_id = db.Column(db.Integer, db.ForeignKey('theme.id'))
+    layout = db.Column(db.String(32), default='standard')  # standard, compact, full-width, etc.
     
     # Relationships
     photos = db.relationship('Photo', backref='memorial', lazy='dynamic')

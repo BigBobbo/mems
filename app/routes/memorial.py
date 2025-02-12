@@ -8,6 +8,7 @@ from datetime import datetime
 import os
 from werkzeug.utils import secure_filename
 from app.utils.qr import generate_memorial_qr
+from app.models.theme import Theme
 
 bp = Blueprint('memorial', __name__)
 
@@ -20,26 +21,23 @@ def index():
 def view(id):
     memorial = Memorial.query.get_or_404(id)
     
-    # Get a fresh instance and ensure we're seeing latest data
-    db.session.refresh(memorial)
-    db.session.flush()
-    
-    # Debug log
-    print(f"Memorial {id} is_public: {memorial.is_public}")
-    print(f"User authenticated: {current_user.is_authenticated}")
-    if current_user.is_authenticated:
-        print(f"User ID: {current_user.id}")
-    
-    # Check if memorial is private - be explicit about the boolean check
-    if memorial.is_public is False:  # Explicit comparison
+    if not memorial.is_public:
         if not current_user.is_authenticated:
-            print("Aborting: User not authenticated")
             abort(403)
         if current_user.id != memorial.creator_id:
-            print("Aborting: Wrong user")
             abort(403)
-            
-    return render_template('memorial/view.html', memorial=memorial, now=datetime.utcnow())
+    
+    # Use theme-specific template if available
+    if memorial.theme:
+        print(f"Using theme template: {memorial.theme.template_path}")  # Debug log
+        template = memorial.theme.template_path
+    else:
+        print("Using default template")  # Debug log
+        template = 'memorial/view.html'
+        
+    return render_template(template, 
+                         memorial=memorial, 
+                         now=datetime.utcnow())
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
@@ -102,6 +100,8 @@ def edit(id):
         memorial.death_date = datetime.strptime(request.form.get('death_date'), '%Y-%m-%d')
         memorial.biography = request.form.get('biography')
         memorial.is_public = bool(request.form.get('is_public'))
+        memorial.theme_id = request.form.get('theme_id', type=int)
+        memorial.layout = request.form.get('layout', 'standard')
         
         custom_url = request.form.get('custom_url')
         if custom_url and custom_url != memorial.custom_url:
@@ -113,8 +113,14 @@ def edit(id):
         db.session.commit()
         flash('Memorial updated successfully')
         return redirect(url_for('memorial.view', id=id))
-        
-    return render_template('memorial/edit.html', memorial=memorial)
+    
+    # Get available themes and add debug logging    
+    themes = Theme.query.filter_by(is_active=True).all()
+    print(f"Available themes: {[t.name for t in themes]}")  # Debug log
+    
+    return render_template('memorial/edit.html', 
+                         memorial=memorial, 
+                         themes=themes)
 
 @bp.route('/memorial/<int:id>/tribute', methods=['POST'])
 @login_required

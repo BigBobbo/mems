@@ -34,8 +34,36 @@
             <div class="mb-3">
                 <label for="custom_url" class="form-label">Custom URL (optional)</label>
                 <input type="text" class="form-control" id="custom_url" name="custom_url" 
-                       value="{{ memorial.custom_url }}" placeholder="e.g., john-doe">
+                       value="" placeholder="e.g., john-doe">
                 <small class="text-muted">Leave blank for auto-generated URL</small>
+            </div>
+            
+            <div class="mb-3">
+                <label for="theme" class="form-label">Theme</label>
+                <select class="form-select" id="theme" name="theme_id">
+                    {% if themes %}
+                        {% for theme in themes %}
+                        <option value="{{ theme.id }}" {% if memorial.theme_id == theme.id %}selected{% endif %}>
+                            {{ theme.name }} - {{ theme.description }}
+                        </option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="">No themes available</option>
+                    {% endif %}
+                </select>
+                <!-- Debug output -->
+                <small class="text-muted">
+                    Available themes: {{ themes|length if themes else 0 }}
+                </small>
+            </div>
+            
+            <div class="mb-3">
+                <label for="layout" class="form-label">Layout</label>
+                <select class="form-select" id="layout" name="layout">
+                    <option value="standard" {% if memorial.layout == 'standard' %}selected{% endif %}>Standard</option>
+                    <option value="compact" {% if memorial.layout == 'compact' %}selected{% endif %}>Compact</option>
+                    <option value="full-width" {% if memorial.layout == 'full-width' %}selected{% endif %}>Full Width</option>
+                </select>
             </div>
             
             <div class="mb-3 form-check">

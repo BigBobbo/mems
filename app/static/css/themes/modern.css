@@ -1,0 +1,117 @@
+.memorial-modern {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: #2c3e50;
+    line-height: 1.6;
+}
+
+.memorial-modern .memorial-header {
+    text-align: center;
+    padding: 3rem 0;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.memorial-modern .memorial-name {
+    font-size: 3rem;
+    font-weight: 300;
+    margin-bottom: 1rem;
+    color: #34495e;
+}
+
+.memorial-modern .memorial-dates {
+    font-size: 1.2rem;
+    color: #7f8c8d;
+}
+
+.memorial-modern .biography-section {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.memorial-modern .photos-section {
+    margin: 2rem 0;
+}
+
+.memorial-modern .photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+.memorial-modern .memorial-photo {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.memorial-modern .memorial-photo:hover {
+    transform: translateY(-5px);
+}
+
+.memorial-modern .photo-caption {
+    padding: 1rem;
+    background-color: white;
+}
+
+.memorial-modern .tribute {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.memorial-modern .tribute-content {
+    font-size: 1.1rem;
+}
+
+.memorial-modern .tribute-author {
+    color: #7f8c8d;
+    margin-top: 1rem;
+    font-style: italic;
+}
+
+.memorial-modern .memorial-controls {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 0 1rem;
+}
+
+.memorial-modern .memorial-controls .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+    white-space: nowrap;
+    min-width: 140px;
+}
+
+.memorial-modern .memorial-controls .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.memorial-modern .memorial-controls .btn i {
+    margin-right: 0.5rem;
+    width: 16px;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .memorial-modern .memorial-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .memorial-modern .memorial-controls .btn {
+        width: 100%;
+        margin: 0.25rem 0;
+    }
+} 

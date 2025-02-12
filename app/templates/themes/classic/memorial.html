@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/themes/classic.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="memorial-classic {% if memorial.layout == 'full-width' %}container-fluid{% elif memorial.layout == 'compact' %}container-sm{% else %}container{% endif %}">
+    <div class="memorial-header">
+        <h1 class="memorial-name">{{ memorial.name }}</h1>
+        <p class="memorial-dates">
+            {{ memorial.birth_date.strftime('%B %d, %Y') }} - 
+            {{ memorial.death_date.strftime('%B %d, %Y') }}
+        </p>
+        
+        {# Add edit controls if user is creator #}
+        {% if current_user.is_authenticated and current_user.id == memorial.creator_id %}
+        <div class="memorial-controls">
+            <a href="{{ url_for('memorial.edit', id=memorial.id) }}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit Memorial
+            </a>
+            <a href="{{ url_for('memorial.manage_photos', id=memorial.id) }}" class="btn btn-secondary">
+                <i class="fas fa-images"></i> Manage Photos
+            </a>
+            <a href="{{ url_for('memorial.manage_tributes', id=memorial.id) }}" class="btn btn-secondary">
+                <i class="fas fa-comments"></i> Manage Tributes
+            </a>
+            <a href="{{ url_for('event.list_events', memorial_id=memorial.id) }}" class="btn btn-secondary">
+                <i class="fas fa-calendar"></i> Events
+            </a>
+            <a href="{{ url_for('memorial.generate_qr', id=memorial.id) }}" class="btn btn-secondary">
+                <i class="fas fa-qrcode"></i> QR Code
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="memorial-content">
+        <div class="biography-section">
+            <h2>Biography</h2>
+            <div class="biography-text">{{ memorial.biography|nl2br|safe }}</div>
+        </div>
+
+        {% if memorial.photos.count() > 0 %}
+        <div class="photos-section">
+            <h2>Photos</h2>
+            <div class="photo-gallery">
+                {% for photo in memorial.photos %}
+                <div class="memorial-photo">
+                    <img src="{{ url_for('static', filename='uploads/' ~ memorial.id ~ '/' ~ photo.filename) }}" 
+                         alt="{{ photo.caption }}" class="img-fluid">
+                    {% if photo.caption %}
+                    <div class="photo-caption">{{ photo.caption }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="tributes-section">
+            <h2>Tributes</h2>
+            {% if memorial.tributes.filter_by(is_approved=true).count() > 0 %}
+                {% for tribute in memorial.tributes.filter_by(is_approved=true) %}
+                <div class="tribute">
+                    <div class="tribute-content">{{ tribute.content }}</div>
+                    <div class="tribute-author">- {{ tribute.author.username }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No tributes yet. Be the first to share a memory.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

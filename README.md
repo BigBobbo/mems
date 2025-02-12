@@ -132,7 +132,7 @@ A platform for creating and managing digital memorials for loved ones.
 - [ ] Memorial visitor statistics
 
 ### Events System
-- [ ] Create and manage memorial events
+- [X] Create and manage memorial events
 - [ ] Event notifications
 - [ ] Calendar integration
 - [ ] RSVP functionality
