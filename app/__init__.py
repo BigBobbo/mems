@@ -16,7 +16,14 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     # Create upload directory
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'])
+    
+    # Use tmp directory for Render's ephemeral filesystem
+    if os.environ.get('RENDER'):
+        app.config['UPLOAD_FOLDER'] = '/tmp/uploads'
+        if not os.path.exists(app.config['UPLOAD_FOLDER']):
+            os.makedirs(app.config['UPLOAD_FOLDER'])
 
     # Initialize extensions
     db.init_app(app)
@@ -53,5 +60,8 @@ def create_app(config_class=Config):
     @app.errorhandler(403)
     def forbidden_error(error):
         return render_template('errors/403.html'), 403
+
+    from app.cli import register_commands
+    register_commands(app)
 
     return app 
