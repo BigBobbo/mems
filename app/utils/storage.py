@@ -30,8 +30,7 @@ class S3Storage:
                 self.bucket,
                 key,
                 ExtraArgs={
-                    'ContentType': file_obj.content_type,
-                    'ACL': 'public-read'
+                    'ContentType': file_obj.content_type
                 }
             )
             
