@@ -8,11 +8,12 @@
 {% block content %}
 <div class="memorial-classic {% if memorial.layout == 'full-width' %}container-fluid{% elif memorial.layout == 'compact' %}container-sm{% else %}container{% endif %}">
     <div class="memorial-header">
-        {% if memorial.photos.filter_by(is_profile=True).first() %}
-        <div class="profile-photo">
-            <img src="{{ url_for('static', filename='uploads/' ~ memorial.id ~ '/' ~ memorial.photos.filter_by(is_profile=True).first().filename) }}" 
-                 alt="{{ memorial.name }}" class="img-fluid rounded-circle">
-        </div>
+        {% if memorial.photos.first() %}
+            {% set profile_photo = memorial.photos.filter_by(is_profile=True).first() or memorial.photos.first() %}
+            <img src="{{ storage.get_file_url(memorial.id, profile_photo.filename) }}" 
+                 class="img-fluid mb-3" 
+                 alt="{{ memorial.name }}"
+                 onerror="this.onerror=null; this.src='/static/images/default-profile.png';">
         {% endif %}
         <h1 class="memorial-name">{{ memorial.name }}</h1>
         <p class="memorial-dates">

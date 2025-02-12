@@ -1,0 +1,7 @@
+{% if tribute.photos %}
+    {% for photo in tribute.photos %}
+        <img src="{{ storage.get_file_url(memorial.id, photo.filename) }}" 
+             class="img-fluid mb-2" 
+             alt="Tribute photo">
+    {% endfor %}
+{% endif %} 

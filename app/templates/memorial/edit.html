@@ -72,6 +72,15 @@
                 <label class="form-check-label" for="is_public">Make this memorial public</label>
             </div>
             
+            <!-- In the photos section -->
+            {% if memorial.photos.first() %}
+                {% set profile_photo = memorial.photos.filter_by(is_profile=True).first() or memorial.photos.first() %}
+                <img src="{{ storage.get_file_url(memorial.id, profile_photo.filename) }}" 
+                     class="img-fluid mb-3" 
+                     alt="{{ memorial.name }}"
+                     onerror="this.onerror=null; this.src='/static/images/default-profile.png';">
+            {% endif %}
+            
             <button type="submit" class="btn btn-primary">Save Changes</button>
             <a href="{{ url_for('memorial.view', id=memorial.id) }}" 
                class="btn btn-secondary">Cancel</a>

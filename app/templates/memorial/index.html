@@ -66,17 +66,22 @@
         <h2>Recent Memorials</h2>
         <div class="row g-4">
             {% for memorial in memorials %}
-            <div class="col-md-4">
-                <div class="memorial-card">
-                    {% if memorial.photos.filter_by(is_profile=true).first() %}
-                    <div class="memorial-image">
-                        <img src="{{ url_for('static', filename='uploads/' ~ memorial.id ~ '/' ~ memorial.photos.filter_by(is_profile=true).first().filename) }}" 
-                             alt="{{ memorial.name }}" class="img-fluid">
-                    </div>
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    {% if memorial.photos.first() %}
+                        {% set profile_photo = memorial.photos.filter_by(is_profile=True).first() or memorial.photos.first() %}
+                        <img src="{{ storage.get_file_url(memorial.id, profile_photo.filename) }}" 
+                             class="card-img-top" 
+                             alt="{{ memorial.name }}"
+                             onerror="this.onerror=null; this.src='/static/images/default-profile.png';">
+                    {% else %}
+                        <img src="/static/images/default-profile.png" 
+                             class="card-img-top" 
+                             alt="{{ memorial.name }}">
                     {% endif %}
-                    <div class="memorial-content">
-                        <h3>{{ memorial.name }}</h3>
-                        <p class="memorial-dates">{{ memorial.birth_date.strftime('%Y') }} - {{ memorial.death_date.strftime('%Y') }}</p>
+                    <div class="card-body">
+                        <h3 class="card-title">{{ memorial.name }}</h3>
+                        <p class="card-text memorial-dates">{{ memorial.birth_date.strftime('%Y') }} - {{ memorial.death_date.strftime('%Y') }}</p>
                         <a href="{{ url_for('memorial.view', id=memorial.id) }}" class="btn btn-outline-secondary">Visit Memorial</a>
                     </div>
                 </div>
