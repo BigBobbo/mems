@@ -1,0 +1,127 @@
+:root {
+    /* Primary colors */
+    --primary-color: #5c6f84;      /* Muted blue-gray */
+    --primary-dark: #445469;       /* Darker blue-gray for hover states */
+    --primary-light: #eef2f7;      /* Light blue-gray for backgrounds */
+    
+    /* Accent colors */
+    --accent-warm: #c4a484;        /* Warm taupe */
+    --accent-soft: #a8c0d6;        /* Soft blue */
+    
+    /* Neutral colors */
+    --neutral-100: #ffffff;
+    --neutral-200: #f8f9fa;
+    --neutral-300: #e9ecef;
+    --neutral-400: #ced4da;
+    --neutral-500: #adb5bd;
+    --neutral-600: #6c757d;
+    --neutral-700: #495057;
+    --neutral-800: #343a40;
+    --neutral-900: #212529;
+    
+    /* Text colors */
+    --text-primary: #2c3e50;
+    --text-secondary: #5c6f84;
+    --text-muted: #6c757d;
+    
+    /* Border colors */
+    --border-light: #dee2e6;
+    --border-medium: #ced4da;
+    
+    /* Shadow */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+}
+
+/* Global styles */
+body {
+    background-color: var(--neutral-200);
+    color: var(--text-primary);
+    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+}
+
+/* Button styles */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--neutral-100);
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background-color: var(--neutral-100);
+    border-color: var(--border-medium);
+    color: var(--text-secondary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--neutral-200);
+    border-color: var(--border-medium);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Card styles */
+.card {
+    background-color: var(--neutral-100);
+    border: none;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+/* Form styles */
+.form-control {
+    border-color: var(--border-light);
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: var(--accent-soft);
+    box-shadow: 0 0 0 0.2rem rgba(168, 192, 214, 0.25);
+}
+
+/* Navigation */
+.navbar {
+    background-color: var(--neutral-100);
+    box-shadow: var(--shadow-sm);
+}
+
+.navbar-brand {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Headers */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* Links */
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+    color: var(--primary-dark);
+    text-decoration: none;
+} 

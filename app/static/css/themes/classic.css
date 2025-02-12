@@ -1,90 +1,146 @@
 .memorial-classic {
-    font-family: "Times New Roman", serif;
-    color: #333;
+    background-color: var(--neutral-100);
+    color: var(--text-primary);
+    padding: 3rem 2rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+    font-family: "Crimson Text", "Times New Roman", serif;
 }
 
 .memorial-classic .memorial-header {
     text-align: center;
-    margin: 2rem 0;
-    border-bottom: 2px solid #ccc;
-    padding-bottom: 1rem;
+    margin: 2rem 0 4rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid var(--accent-warm);
+    position: relative;
+}
+
+.memorial-classic .memorial-header:after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 25%;
+    right: 25%;
+    height: 1px;
+    background-color: var(--accent-warm);
+    opacity: 0.5;
 }
 
 .memorial-classic .memorial-name {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
+    font-size: 3.5rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-bottom: 1rem;
+    letter-spacing: 0.5px;
 }
 
 .memorial-classic .memorial-dates {
     font-style: italic;
-    color: #666;
+    color: var(--text-secondary);
+    font-size: 1.3rem;
 }
 
 .memorial-classic .biography-section {
-    margin: 2rem 0;
-    line-height: 1.6;
+    margin: 3rem 0;
+    line-height: 1.8;
+    padding: 0 2rem;
+}
+
+.memorial-classic .biography-section h2 {
+    color: var(--primary-color);
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-weight: 600;
 }
 
 .memorial-classic .photos-section {
-    margin: 2rem 0;
+    margin: 4rem 0;
+    padding: 2rem;
+    background-color: var(--primary-light);
+    border-radius: 8px;
 }
 
 .memorial-classic .photo-gallery {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
-    margin: 1rem 0;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.memorial-classic .memorial-photo {
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    background-color: var(--neutral-100);
+    padding: 8px;
+    transition: all 0.3s ease;
+}
+
+.memorial-classic .memorial-photo:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.memorial-classic .photo-caption {
+    padding: 1rem;
+    text-align: center;
+    font-style: italic;
+    color: var(--text-secondary);
 }
 
 .memorial-classic .tribute {
-    margin: 1.5rem 0;
-    padding: 1rem;
-    border-left: 3px solid #ccc;
-    background-color: #f9f9f9;
+    margin: 2rem 0;
+    padding: 2rem;
+    border-left: 3px solid var(--accent-warm);
+    background-color: var(--neutral-100);
+    box-shadow: var(--shadow-sm);
+}
+
+.memorial-classic .tribute-content {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: var(--text-primary);
 }
 
 .memorial-classic .tribute-author {
+    margin-top: 1rem;
     font-style: italic;
-    color: #666;
-    margin-top: 0.5rem;
+    color: var(--text-secondary);
+    text-align: right;
 }
 
 .memorial-classic .memorial-controls {
-    margin-top: 2rem;
+    margin: 3rem 0 2rem;
+    padding: 2rem;
     display: flex;
-    gap: 1rem;
+    gap: 1.2rem;
     justify-content: center;
     flex-wrap: wrap;
-    padding: 0 1rem;
-    border-top: 2px solid #eee;
-    padding-top: 2rem;
+    border-top: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .memorial-classic .memorial-controls .btn {
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    transition: all 0.2s;
-    white-space: nowrap;
-    min-width: 140px;
-    font-family: "Times New Roman", serif;
-    border: 1px solid #ccc;
+    padding: 0.8rem 1.8rem;
+    font-size: 1.1rem;
+    min-width: 180px;
 }
 
 .memorial-classic .memorial-controls .btn-primary {
-    background-color: #2c3e50;
-    border-color: #2c3e50;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.memorial-classic .memorial-controls .btn-secondary {
+    background-color: var(--neutral-100);
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
 }
 
 .memorial-classic .memorial-controls .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.memorial-classic .memorial-controls .btn i {
-    margin-right: 0.5rem;
-    width: 16px;
-    text-align: center;
+    box-shadow: var(--shadow-md);
 }
 
 @media (max-width: 768px) {
