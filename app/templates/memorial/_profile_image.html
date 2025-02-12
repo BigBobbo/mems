@@ -1,11 +1,24 @@
-{% if memorial.photos.first() %}
-    {% set profile_photo = memorial.photos.filter_by(is_profile=True).first() or memorial.photos.first() %}
-    <img src="{{ storage.get_file_url(memorial.id, profile_photo.filename) }}" 
-         alt="{{ memorial.name }}" 
-         class="img-fluid rounded-circle"
-         onerror="this.onerror=null; this.src='/static/images/default-profile.png';">
-{% else %}
-    <img src="/static/images/default-profile.png" 
-         alt="{{ memorial.name }}" 
-         class="img-fluid rounded-circle">
-{% endif %} 
+<style>
+.profile-image-container img {
+    max-width: 300px;
+    max-height: 300px;
+    width: auto;
+    height: auto;
+    border-radius: 50%;
+    object-fit: cover;
+}
+</style>
+
+<div class="profile-image-container">
+    {% if memorial.photos.first() %}
+        {% set profile_photo = memorial.photos.filter_by(is_profile=True).first() or memorial.photos.first() %}
+        <img src="{{ storage.get_file_url(memorial.id, profile_photo.filename) }}" 
+             alt="{{ memorial.name }}" 
+             class="img-fluid rounded-circle"
+             onerror="this.onerror=null; this.src='/static/images/default-profile.png';">
+    {% else %}
+        <img src="/static/images/default-profile.png" 
+             alt="{{ memorial.name }}" 
+             class="img-fluid rounded-circle">
+    {% endif %}
+</div> 
