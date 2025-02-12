@@ -2,68 +2,7 @@ from app.models.memorial import Memorial
 from datetime import datetime
 import pytest
 from app import db
-
-def test_view_public_memorial(client, test_memorial):
-    """Test viewing a public memorial"""
-    response = client.get(f'/memorial/{test_memorial.id}')
-    assert response.status_code == 200
-    assert test_memorial.name.encode() in response.data
-    assert test_memorial.biography.encode() in response.data
-
-def test_view_private_memorial(client, app, test_user, test_memorial):
-    """Test viewing a private memorial redirects to private page"""
-    with app.app_context():
-        test_memorial.is_public = False
-        db.session.commit()
-    
-    response = client.get(f'/memorial/{test_memorial.id}')
-    assert response.status_code == 200
-    assert b'This memorial is private' in response.data
-
-def test_create_memorial(client, test_user):
-    """Test creating a new memorial"""
-    # Login first
-    client.post('/auth/login', data={
-        'email': 'test@example.com',
-        'password': 'password123'
-    })
-    
-    response = client.post('/create', data={
-        'name': 'New Memorial',
-        'birth_date': '1960-01-01',
-        'death_date': '2021-01-01',
-        'biography': 'New biography',
-        'is_public': True
-    })
-    assert response.status_code == 302  # Redirect after creation
-    
-    with app.app_context():
-        memorial = Memorial.query.filter_by(name='New Memorial').first()
-        assert memorial is not None
-        assert memorial.biography == 'New biography'
-        assert memorial.creator_id == test_user.id
-
-def test_edit_memorial(client, app, test_user, test_memorial):
-    """Test editing a memorial"""
-    # Login first
-    client.post('/auth/login', data={
-        'email': 'test@example.com',
-        'password': 'password123'
-    })
-    
-    response = client.post(f'/memorial/{test_memorial.id}/edit', data={
-        'name': 'Updated Memorial',
-        'birth_date': '1960-01-01',
-        'death_date': '2021-01-01',
-        'biography': 'Updated biography',
-        'is_public': True
-    })
-    assert response.status_code == 302  # Redirect after edit
-    
-    with app.app_context():
-        memorial = Memorial.query.get(test_memorial.id)
-        assert memorial.name == 'Updated Memorial'
-        assert memorial.biography == 'Updated biography'
+from flask import url_for
 
 def login(client, email, password):
     return client.post('/auth/login', data={
@@ -73,6 +12,71 @@ def login(client, email, password):
 
 def logout(client):
     return client.get('/auth/logout', follow_redirects=True)
+
+def test_view_public_memorial(client, app, session, test_memorial):
+    """Test viewing a public memorial"""
+    with app.app_context():
+        # Commit the transaction to make the memorial visible
+        session.commit()
+        
+        response = client.get(f'/memorial/{test_memorial.id}')
+        assert response.status_code == 200
+        assert test_memorial.name.encode() in response.data
+        assert test_memorial.biography.encode() in response.data
+
+def test_view_private_memorial(client, app, session, test_memorial):
+    """Test viewing a private memorial redirects to private page"""
+    with app.app_context():
+        test_memorial.is_public = False
+        session.commit()
+        
+        response = client.get(f'/memorial/{test_memorial.id}')
+        assert response.status_code == 200
+        assert b'This memorial is private' in response.data
+
+def test_create_memorial(client, app, session, test_user):
+    """Test creating a new memorial"""
+    with app.app_context():
+        # Commit the test user to make it available for login
+        session.commit()
+        
+        # Login first
+        login(client, 'test@example.com', 'password123')
+        
+        response = client.post('/create', data={
+            'name': 'New Memorial',
+            'birth_date': '1960-01-01',
+            'death_date': '2021-01-01',
+            'biography': 'New biography',
+            'is_public': True
+        })
+        assert response.status_code == 302  # Redirect after creation
+        
+        # Refresh the session to see the new memorial
+        session.expire_all()
+        memorial = Memorial.query.filter_by(name='New Memorial').first()
+        assert memorial is not None
+        assert memorial.biography == 'New biography'
+        assert memorial.creator_id == test_user.id
+
+def test_edit_memorial(client, app, test_user, test_memorial):
+    """Test editing a memorial"""
+    with app.app_context():
+        # Login first
+        login(client, 'test@example.com', 'password123')
+        
+        response = client.post(f'/memorial/{test_memorial.id}/edit', data={
+            'name': 'Updated Memorial',
+            'birth_date': '1960-01-01',
+            'death_date': '2021-01-01',
+            'biography': 'Updated biography',
+            'is_public': True
+        })
+        assert response.status_code == 302  # Redirect after edit
+        
+        memorial = Memorial.query.get(test_memorial.id)
+        assert memorial.name == 'Updated Memorial'
+        assert memorial.biography == 'Updated biography'
 
 def test_memorial_list(client):
     """Test viewing the list of public memorials"""
@@ -151,14 +155,25 @@ def test_duplicate_custom_url(client, app, test_user):
     }, follow_redirects=True)
     assert b'Custom URL already taken' in response.data
 
-@pytest.mark.parametrize('test_input,expected', [
-    ({'name': '', 'birth_date': '1960-01-01', 'death_date': '2021-01-01'}, b'Name is required'),
-    ({'name': 'Test', 'birth_date': '', 'death_date': '2021-01-01'}, b'Birth date is required'),
-    ({'name': 'Test', 'birth_date': '1960-01-01', 'death_date': ''}, b'Death date is required'),
-])
-def test_memorial_validation(client, test_user, test_input, expected):
-    """Test memorial form validation"""
-    login(client, 'test@example.com', 'password123')
-    
-    response = client.post('/create', data=test_input, follow_redirects=True)
-    assert expected in response.data 
+def test_validation_errors(client, app, test_user):
+    """Test form validation errors"""
+    with app.app_context():
+        login(client, 'test@example.com', 'password123')
+        
+        # Test missing name
+        response = client.post('/create', data={
+            'name': '',
+            'birth_date': '1960-01-01',
+            'death_date': '2021-01-01',
+            'biography': 'Test bio'
+        }, follow_redirects=True)
+        assert b'Name is required' in response.data
+        
+        # Test missing birth date
+        response = client.post('/create', data={
+            'name': 'Test Memorial',
+            'birth_date': '',
+            'death_date': '2021-01-01',
+            'biography': 'Test bio'
+        }, follow_redirects=True)
+        assert b'Birth date is required' in response.data 

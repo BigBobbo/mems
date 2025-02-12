@@ -27,27 +27,47 @@ def view(id):
 @login_required
 def create():
     if request.method == 'POST':
-        memorial = Memorial(
-            name=request.form.get('name'),
-            birth_date=datetime.strptime(request.form.get('birth_date'), '%Y-%m-%d'),
-            death_date=datetime.strptime(request.form.get('death_date'), '%Y-%m-%d'),
-            biography=request.form.get('biography'),
-            is_public=bool(request.form.get('is_public')),
-            creator_id=current_user.id
-        )
+        name = request.form.get('name')
+        birth_date = request.form.get('birth_date')
+        death_date = request.form.get('death_date')
         
-        custom_url = request.form.get('custom_url')
-        if custom_url:
-            if Memorial.query.filter_by(custom_url=custom_url).first():
-                flash('Custom URL already taken')
-                return render_template('memorial/create.html')
-            memorial.custom_url = custom_url
+        if not name:
+            flash('Name is required')
+            return render_template('memorial/create.html')
             
-        db.session.add(memorial)
-        db.session.commit()
-        flash('Memorial created successfully')
-        return redirect(url_for('memorial.view', id=memorial.id))
-        
+        if not birth_date:
+            flash('Birth date is required')
+            return render_template('memorial/create.html')
+            
+        if not death_date:
+            flash('Death date is required')
+            return render_template('memorial/create.html')
+            
+        try:
+            memorial = Memorial(
+                name=name,
+                birth_date=datetime.strptime(birth_date, '%Y-%m-%d'),
+                death_date=datetime.strptime(death_date, '%Y-%m-%d'),
+                biography=request.form.get('biography'),
+                is_public=bool(request.form.get('is_public')),
+                creator_id=current_user.id
+            )
+            
+            custom_url = request.form.get('custom_url')
+            if custom_url:
+                if Memorial.query.filter_by(custom_url=custom_url).first():
+                    flash('Custom URL already taken')
+                    return render_template('memorial/create.html')
+                memorial.custom_url = custom_url
+                
+            db.session.add(memorial)
+            db.session.commit()
+            flash('Memorial created successfully')
+            return redirect(url_for('memorial.view', id=memorial.id))
+        except ValueError:
+            flash('Invalid date format')
+            return render_template('memorial/create.html')
+            
     return render_template('memorial/create.html')
 
 @bp.route('/memorial/<int:id>/edit', methods=['GET', 'POST'])
