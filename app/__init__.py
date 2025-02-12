@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail
@@ -46,5 +46,9 @@ def create_app(config_class=Config):
     with app.app_context():
         from app.models.init_db import init_db
         init_db()
+
+    @app.errorhandler(403)
+    def forbidden_error(error):
+        return render_template('errors/403.html'), 403
 
     return app 

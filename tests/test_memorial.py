@@ -3,6 +3,8 @@ from datetime import datetime
 import pytest
 from app import db
 from flask import url_for
+from app.models.user import User
+from flask_login import current_user
 
 def login(client, email, password):
     return client.post('/auth/login', data={
@@ -25,14 +27,38 @@ def test_view_public_memorial(client, app, session, test_memorial):
         assert test_memorial.biography.encode() in response.data
 
 def test_view_private_memorial(client, app, session, test_memorial):
-    """Test viewing a private memorial redirects to private page"""
+    """Test viewing a private memorial returns 403 Forbidden for unauthorized users"""
     with app.app_context():
-        test_memorial.is_public = False
+        # First ensure we're logged out
+        logout(client)
+        
+        # Store the ID and update the memorial
+        memorial_id = test_memorial.id
+        
+        # Make the memorial private and commit
+        memorial = Memorial.query.get(memorial_id)
+        memorial.is_public = False
         session.commit()
         
-        response = client.get(f'/memorial/{test_memorial.id}')
-        assert response.status_code == 200
-        assert b'This memorial is private' in response.data
+        # Force database to refresh
+        session.expire_all()
+        session.close()
+        
+        # Verify the change was persisted
+        memorial = Memorial.query.get(memorial_id)
+        assert not memorial.is_public, "Memorial should be private"
+        
+        # Test 1: Unauthenticated user should get 403
+        response = client.get(f'/memorial/{memorial_id}')
+        
+        # Debug information
+        print("\nDebug Info:")
+        print(f"Response Status Code: {response.status_code}")
+        print(f"Response Data: {response.data.decode()[:200]}...")  # Show first 200 chars
+        print(f"Is Memorial Private? {memorial.is_public}")
+        print(f"Memorial ID: {memorial.id}")
+        
+        assert response.status_code == 403, "Unauthenticated user should get 403"
 
 def test_create_memorial(client, app, session, test_user):
     """Test creating a new memorial"""
@@ -94,22 +120,22 @@ def test_unauthorized_edit(client, test_memorial):
     }, follow_redirects=True)
     assert b'Please log in to access this page' in response.data
 
-def test_wrong_user_edit(client, app, test_memorial):
+def test_wrong_user_edit(client, app, session, test_memorial):
     """Test that wrong users cannot edit other's memorials"""
-    # Create another user
-    other_user = User(username='other', email='other@example.com')
-    other_user.set_password('password123')
     with app.app_context():
-        db.session.add(other_user)
-        db.session.commit()
-    
-    # Login as other user
-    login(client, 'other@example.com', 'password123')
-    
-    response = client.post(f'/memorial/{test_memorial.id}/edit', data={
-        'name': 'Hacked Memorial',
-    }, follow_redirects=True)
-    assert b'You do not have permission to edit this memorial' in response.data
+        # Create another user
+        other_user = User(username='other', email='other@example.com')
+        other_user.set_password('password123')
+        session.add(other_user)
+        session.commit()
+        
+        # Login as other user
+        login(client, 'other@example.com', 'password123')
+        
+        response = client.post(f'/memorial/{test_memorial.id}/edit', data={
+            'name': 'Hacked Memorial',
+        }, follow_redirects=True)
+        assert b'You do not have permission to edit this memorial' in response.data
 
 def test_custom_url(client, app, test_user):
     """Test creating memorial with custom URL"""

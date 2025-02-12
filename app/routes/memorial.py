@@ -19,8 +19,26 @@ def index():
 @bp.route('/memorial/<int:id>')
 def view(id):
     memorial = Memorial.query.get_or_404(id)
-    if not memorial.is_public:
-        return render_template('memorial/private.html')
+    
+    # Get a fresh instance and ensure we're seeing latest data
+    db.session.refresh(memorial)
+    db.session.flush()
+    
+    # Debug log
+    print(f"Memorial {id} is_public: {memorial.is_public}")
+    print(f"User authenticated: {current_user.is_authenticated}")
+    if current_user.is_authenticated:
+        print(f"User ID: {current_user.id}")
+    
+    # Check if memorial is private - be explicit about the boolean check
+    if memorial.is_public is False:  # Explicit comparison
+        if not current_user.is_authenticated:
+            print("Aborting: User not authenticated")
+            abort(403)
+        if current_user.id != memorial.creator_id:
+            print("Aborting: Wrong user")
+            abort(403)
+            
     return render_template('memorial/view.html', memorial=memorial, now=datetime.utcnow())
 
 @bp.route('/create', methods=['GET', 'POST'])
@@ -271,14 +289,16 @@ def reorder_photo(id, photo_id):
 def view_gallery(id):
     memorial = Memorial.query.get_or_404(id)
     if not memorial.is_public:
-        return render_template('memorial/private.html')
+        if not current_user.is_authenticated or current_user.id != memorial.creator_id:
+            abort(403)  # Return 403 Forbidden instead of rendering private.html
     return render_template('memorial/gallery.html', memorial=memorial, Photo=Photo)
 
 @bp.route('/memorial/<int:id>/qr')
 def generate_qr(id):
     memorial = Memorial.query.get_or_404(id)
     if not memorial.is_public:
-        abort(403)
+        if not current_user.is_authenticated or current_user.id != memorial.creator_id:
+            abort(403)  # Keep consistent with other routes
         
     url = url_for('memorial.view', id=id, _external=True)
     qr_filename = generate_memorial_qr(id, url)

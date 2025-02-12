@@ -27,7 +27,7 @@ def session(app):
         
         yield db.session
         
-        # Rollback the transaction
+        # Rollback the transaction and clear the session
         db.session.rollback()
         db.session.remove()
 
@@ -56,7 +56,6 @@ def test_user(app, session):
 def test_memorial(app, session, test_user):
     """Create a test memorial that stays attached to the session"""
     with app.app_context():
-        # Create and persist the memorial
         memorial = Memorial(
             name='Test Memorial',
             birth_date=datetime(1950, 1, 1),
@@ -66,12 +65,14 @@ def test_memorial(app, session, test_user):
             creator_id=test_user.id
         )
         session.add(memorial)
-        session.flush()  # Flush to get the ID without committing
+        session.commit()
         
-        # Store the ID for later use
+        # Get a fresh instance to ensure it's attached to the session
         memorial_id = memorial.id
+        memorial = Memorial.query.get(memorial_id)
         
         yield memorial
         
         # Clean up
-        session.query(Memorial).filter_by(id=memorial_id).delete() 
+        session.delete(memorial)
+        session.commit() 
