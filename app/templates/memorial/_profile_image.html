@@ -1,0 +1,11 @@
+{% if memorial.photos.first() %}
+    {% set profile_photo = memorial.photos.filter_by(is_profile=True).first() or memorial.photos.first() %}
+    <img src="{{ storage.get_file_url(memorial.id, profile_photo.filename) }}" 
+         alt="{{ memorial.name }}" 
+         class="img-fluid rounded-circle"
+         onerror="this.onerror=null; this.src='/static/images/default-profile.png';">
+{% else %}
+    <img src="/static/images/default-profile.png" 
+         alt="{{ memorial.name }}" 
+         class="img-fluid rounded-circle">
+{% endif %} 

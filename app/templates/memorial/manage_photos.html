@@ -29,7 +29,11 @@
                             <label for="date_taken" class="form-label">Date Taken</label>
                             <input type="date" class="form-control" id="date_taken" name="date_taken">
                         </div>
-                        <button type="submit" class="btn btn-primary">Upload</button>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="is_profile" name="is_profile" value="true">
+                            <label class="form-check-label" for="is_profile">Set as profile photo</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Upload Photo</button>
                     </form>
                 </div>
             </div>
@@ -46,8 +50,9 @@
                                 <div class="card-header handle">
                                     <i class="fas fa-grip-lines"></i>
                                 </div>
-                                <img src="{{ url_for('static', filename='uploads/' + memorial.id|string + '/' + photo.filename) }}" 
-                                     class="card-img-top" alt="{{ photo.caption or 'Memorial photo' }}">
+                                <img src="{{ storage.get_file_url(memorial.id, photo.filename) }}" 
+                                     class="card-img-top" alt="{{ photo.caption or 'Memorial photo' }}"
+                                     onerror="this.onerror=null; console.error('Failed to load:', this.src);">
                                 <div class="card-body">
                                     {% if photo.caption %}
                                     <p class="card-text">{{ photo.caption }}</p>

@@ -216,21 +216,27 @@ def manage_photos(id):
             flash('No photo selected')
             return redirect(request.url)
             
-        filename = save_photo(file, id)
-        if filename:
-            photo = Photo(
-                filename=filename,
-                caption=request.form.get('caption'),
-                memorial_id=id,
-                date_taken=datetime.strptime(request.form.get('date_taken'), '%Y-%m-%d') if request.form.get('date_taken') else None
-            )
-            db.session.add(photo)
-            db.session.commit()
-            flash('Photo uploaded successfully')
-        else:
-            flash('Invalid file type')
-            
-    return render_template('memorial/manage_photos.html', memorial=memorial, Photo=Photo)
+        if file and allowed_file(file.filename):
+            try:
+                filename = storage.upload_file(file, id, file.filename)
+                if filename:
+                    photo = Photo(
+                        filename=filename,
+                        caption=request.form.get('caption'),
+                        memorial_id=id,
+                        is_profile=request.form.get('is_profile') == 'true',
+                        date_taken=datetime.strptime(request.form.get('date_taken'), '%Y-%m-%d') if request.form.get('date_taken') else None
+                    )
+                    db.session.add(photo)
+                    db.session.commit()
+                    flash('Photo uploaded successfully')
+                else:
+                    flash('Error uploading photo')
+            except Exception as e:
+                current_app.logger.error(f"Upload error: {e}")
+                flash('Error uploading photo')
+                
+    return render_template('memorial/manage_photos.html', memorial=memorial)
 
 @bp.route('/memorial/<int:id>/photo/<int:photo_id>/delete', methods=['POST'])
 @login_required
@@ -244,15 +250,14 @@ def delete_photo(id, photo_id):
     if photo.memorial_id != id:
         abort(404)
         
-    # Delete file from filesystem
-    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 
-                            str(id), photo.filename)
-    if os.path.exists(file_path):
-        os.remove(file_path)
+    # Delete from S3
+    if storage.delete_file(id, photo.filename):
+        db.session.delete(photo)
+        db.session.commit()
+        flash('Photo deleted')
+    else:
+        flash('Error deleting photo', 'error')
         
-    db.session.delete(photo)
-    db.session.commit()
-    flash('Photo deleted')
     return redirect(url_for('memorial.manage_photos', id=id))
 
 @bp.route('/memorial/<int:id>/photo/<int:photo_id>/set-profile', methods=['POST'])
