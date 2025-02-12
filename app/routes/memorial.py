@@ -236,7 +236,9 @@ def manage_photos(id):
                 current_app.logger.error(f"Upload error: {e}")
                 flash('Error uploading photo')
                 
-    return render_template('memorial/manage_photos.html', memorial=memorial)
+    return render_template('memorial/manage_photos.html', 
+                         memorial=memorial,
+                         Photo=Photo)
 
 @bp.route('/memorial/<int:id>/photo/<int:photo_id>/delete', methods=['POST'])
 @login_required
