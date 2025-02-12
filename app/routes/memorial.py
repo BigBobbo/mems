@@ -7,6 +7,7 @@ from app import db
 from datetime import datetime
 import os
 from werkzeug.utils import secure_filename
+from app.utils.qr import generate_memorial_qr
 
 bp = Blueprint('memorial', __name__)
 
@@ -252,5 +253,18 @@ def view_gallery(id):
     if not memorial.is_public:
         return render_template('memorial/private.html')
     return render_template('memorial/gallery.html', memorial=memorial, Photo=Photo)
+
+@bp.route('/memorial/<int:id>/qr')
+def generate_qr(id):
+    memorial = Memorial.query.get_or_404(id)
+    if not memorial.is_public:
+        abort(403)
+        
+    url = url_for('memorial.view', id=id, _external=True)
+    qr_filename = generate_memorial_qr(id, url)
+    
+    return render_template('memorial/qr.html', 
+                         memorial=memorial,
+                         qr_filename=qr_filename)
 
 # Routes will be added here 

@@ -30,6 +30,38 @@
         <div class="col-md-4 text-end">
             <a href="{{ url_for('event.list_events', memorial_id=event.memorial_id) }}" 
                class="btn btn-secondary">Back to Events</a>
+            <div class="dropdown d-inline">
+                <button class="btn btn-outline-primary dropdown-toggle" type="button" 
+                        id="shareButton" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-share-alt"></i> Share
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="shareButton">
+                    <li>
+                        <a class="dropdown-item" href="https://www.facebook.com/sharer/sharer.php?u={{ request.url|urlencode }}" 
+                           target="_blank">
+                            <i class="fab fa-facebook"></i> Facebook
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="https://twitter.com/intent/tweet?url={{ request.url|urlencode }}&text={{ event.title|urlencode }}" 
+                           target="_blank">
+                            <i class="fab fa-twitter"></i> Twitter
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="mailto:?subject={{ event.title|urlencode }}&body={{ request.url|urlencode }}" 
+                           target="_blank">
+                            <i class="fas fa-envelope"></i> Email
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ event.title|urlencode }}&dates={{ event.date.strftime('%Y%m%dT%H%M%S') }}/{{ (event.end_date or event.date).strftime('%Y%m%dT%H%M%S') }}&details={{ event.description|urlencode }}&location={{ event.location|default('')|urlencode }}" 
+                           target="_blank">
+                            <i class="far fa-calendar-plus"></i> Add to Calendar
+                        </a>
+                    </li>
+                </ul>
+            </div>
             {% if current_user.is_authenticated and current_user.id == event.creator_id %}
                 <a href="{{ url_for('event.edit_event', memorial_id=event.memorial_id, event_id=event.id) }}" 
                    class="btn btn-outline-secondary">Edit Event</a>

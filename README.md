@@ -112,6 +112,27 @@ A platform for creating and managing digital memorials for loved ones.
 - [ ] System logs
 - [ ] Backup management
 
+### Automated Testing
+- [ ] Unit tests
+- [ ] Integration tests
+- [ ] End-to-end tests
+
+### Documentation
+- [ ] User documentation
+- [ ] Developer documentation
+- [ ] API documentation
+
+### Deployment
+- [ ] Docker containerization
+- [ ] Kubernetes deployment
+- [ ] CI/CD pipeline
+- [ ] Monitoring and logging
+- [ ] Performance optimization
+
+### QR Code
+- [ ] QR code generation for memorials
+- [ ] QR code scanning for memorials
+
 ## Technical Stack
 
 - Flask web framework

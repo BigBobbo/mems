@@ -21,6 +21,10 @@
                class="btn btn-outline-secondary">Manage Photos</a>
             <a href="{{ url_for('event.list_events', memorial_id=memorial.id) }}" 
                class="btn btn-outline-secondary">Manage Events</a>
+            <a href="{{ url_for('memorial.generate_qr', id=memorial.id) }}" 
+               class="btn btn-outline-secondary">
+                <i class="fas fa-qrcode"></i> QR Code
+            </a>
         </div>
         {% endif %}
     </div>

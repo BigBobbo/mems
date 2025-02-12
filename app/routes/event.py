@@ -123,4 +123,25 @@ def delete_event(memorial_id, event_id):
     db.session.delete(event)
     db.session.commit()
     flash('Event deleted successfully')
-    return redirect(url_for('event.list_events', memorial_id=memorial_id)) 
+    return redirect(url_for('event.list_events', memorial_id=memorial_id))
+
+@bp.route('/memorial/<int:memorial_id>/events/<int:event_id>/share')
+def share_event(memorial_id, event_id):
+    event = Event.query.get_or_404(event_id)
+    if event.memorial_id != memorial_id:
+        abort(404)
+    if not event.memorial.is_public:
+        abort(403)
+        
+    share_url = url_for('event.view_event', 
+                       memorial_id=memorial_id, 
+                       event_id=event_id, 
+                       _external=True)
+    
+    return {
+        'url': share_url,
+        'title': event.title,
+        'description': event.description,
+        'date': event.date.strftime('%Y-%m-%d %H:%M'),
+        'location': event.location if not event.is_online else 'Online Event'
+    } 

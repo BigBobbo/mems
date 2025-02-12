@@ -21,4 +21,10 @@ class Config:
     MAIL_PORT = int(os.environ.get('MAIL_PORT') or 587)
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') 
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+
+class TestConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # Use in-memory database for testing
+    WTF_CSRF_ENABLED = False  # Disable CSRF for testing
+    UPLOAD_FOLDER = 'tests/uploads'  # Separate upload folder for tests 

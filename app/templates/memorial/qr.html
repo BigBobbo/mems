@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}QR Code - {{ memorial.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h2>QR Code for {{ memorial.name }}</h2>
+                    <p class="text-muted">Scan this code to visit the memorial page</p>
+                    
+                    <div class="my-4">
+                        <img src="{{ url_for('static', filename='qr_codes/' + qr_filename) }}" 
+                             alt="Memorial QR Code" class="img-fluid">
+                    </div>
+                    
+                    <div class="btn-group">
+                        <a href="{{ url_for('static', filename='qr_codes/' + qr_filename) }}" 
+                           download="memorial_{{ memorial.id }}_qr.png" 
+                           class="btn btn-primary">
+                            <i class="fas fa-download"></i> Download QR Code
+                        </a>
+                        <a href="{{ url_for('memorial.view', id=memorial.id) }}" 
+                           class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Memorial
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
