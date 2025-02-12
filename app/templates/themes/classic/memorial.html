@@ -80,6 +80,24 @@
             {% else %}
                 <p>No tributes yet. Be the first to share a memory.</p>
             {% endif %}
+            
+            {% if current_user.is_authenticated %}
+                <div class="add-tribute-form mt-4">
+                    <h3>Share Your Memory</h3>
+                    <form method="POST" action="{{ url_for('memorial.add_tribute', id=memorial.id) }}">
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Your Tribute</label>
+                            <textarea class="form-control" id="content" name="content" 
+                                     rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Tribute</button>
+                    </form>
+                </div>
+            {% else %}
+                <div class="mt-4">
+                    <p>Please <a href="{{ url_for('auth.login') }}">log in</a> to share your memories.</p>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
