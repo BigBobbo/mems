@@ -3,7 +3,7 @@ services:
     name: memorial-site
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn "app:create_app()" --bind 0.0.0.0:$PORT
+    startCommand: gunicorn "app:create_app()" --bind 0.0.0.0:$PORT --timeout 120
     envVars:
       - key: FLASK_APP
         value: app
@@ -27,7 +27,12 @@ services:
         fromSecret: true
       - key: AWS_REGION
         value: "us-east-1"
+      - key: SQLALCHEMY_TRACK_MODIFICATIONS
+        value: "False"
+      - key: SQLALCHEMY_ENGINE_OPTIONS
+        value: '{"pool_pre_ping": true}'
 
 databases:
   - name: memorial-db
     ipAllowList: []  # This means the database accepts connections from all Render services 
+    plan: starter # or whatever plan you're using 

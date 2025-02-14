@@ -9,17 +9,25 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'app.db')
-    if SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
+    if SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
         SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = os.environ.get('FLASK_DEBUG') == '1'  # Log SQL in debug mode
     
-    # Add database pool settings for better connection handling
+    # Enhanced database settings
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_size': 5,
-        'pool_recycle': 280,
+        'pool_recycle': 280,  # Recycle connections before Render's 300s timeout
         'pool_timeout': 20,
-        'max_overflow': 2
+        'max_overflow': 2,
+        'pool_pre_ping': True,  # Enable automatic reconnection
+        'connect_args': {
+            'connect_timeout': 10,
+            'keepalives': 1,
+            'keepalives_idle': 30,
+            'keepalives_interval': 10,
+            'keepalives_count': 5
+        }
     }
     
     # File upload settings

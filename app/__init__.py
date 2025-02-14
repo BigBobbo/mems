@@ -6,6 +6,8 @@ from flask_migrate import Migrate
 from config import Config
 from app.utils.storage import S3Storage
 import os
+from sqlalchemy import exc
+import time
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -73,21 +75,39 @@ def create_app(config_class=Config):
     from app.cli import register_commands
     register_commands(app)
 
-    # Add database connection error handling
+    def get_db():
+        """Get database connection with retry logic"""
+        max_retries = 3
+        retry_delay = 1  # seconds
+        
+        for attempt in range(max_retries):
+            try:
+                # Test the connection
+                db.session.execute('SELECT 1')
+                return db.session
+            except Exception as e:
+                app.logger.error(f"Database connection attempt {attempt + 1} failed: {e}")
+                if attempt < max_retries - 1:
+                    time.sleep(retry_delay)
+                    retry_delay *= 2  # Exponential backoff
+                    db.session.remove()  # Clean up the session
+                else:
+                    raise
+
     @app.before_request
     def before_request():
         try:
-            # Verify database connection
-            db.session.execute('SELECT 1')
+            # Get database connection with retry
+            get_db()
         except Exception as e:
-            app.logger.error(f"Database connection error: {e}")
-            db.session.rollback()
+            app.logger.error(f"Database connection failed after retries: {e}")
             return "Database connection error. Please try again.", 500
-            
+
     @app.teardown_request
     def teardown_request(exception=None):
         if exception:
             db.session.rollback()
+            app.logger.error(f"Request error, rolling back: {exception}")
         db.session.remove()
 
     return app 
