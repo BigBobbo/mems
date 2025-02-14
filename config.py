@@ -22,13 +22,15 @@ class Config:
         'max_overflow': 2,
         'pool_pre_ping': True,  # Enable automatic reconnection
         'connect_args': {
-            'connect_timeout': 10,
-            'keepalives': 1,
-            'keepalives_idle': 30,
-            'keepalives_interval': 10,
-            'keepalives_count': 5
+            'options': '-c statement_timeout=10000'  # 10 second timeout
         }
     }
+    
+    # For SQLite (development)
+    if os.environ.get('DATABASE_URL') and 'postgresql' not in os.environ.get('DATABASE_URL'):
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            'pool_pre_ping': True
+        }
     
     # File upload settings
     UPLOAD_FOLDER = os.path.join(basedir, 'app', 'static', 'uploads')
