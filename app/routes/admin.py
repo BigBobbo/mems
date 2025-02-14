@@ -1,6 +1,5 @@
-from flask import Blueprint, jsonify
-from flask import current_app
-from flask import db
+from flask import Blueprint, jsonify, current_app
+from app import db  # Import db from app instead of flask
 
 bp = Blueprint('admin', __name__)
 
