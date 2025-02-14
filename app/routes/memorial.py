@@ -10,6 +10,7 @@ from werkzeug.utils import secure_filename
 from app.utils.qr import generate_memorial_qr
 from app.models.theme import Theme
 from app.utils.storage import S3Storage
+from app.utils.db_monitor import monitor_db
 
 bp = Blueprint('memorial', __name__)
 
@@ -91,6 +92,7 @@ def create():
 
 @bp.route('/memorial/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
+@monitor_db
 def edit(id):
     memorial = Memorial.query.get_or_404(id)
     if current_user.id != memorial.creator_id:

@@ -73,4 +73,21 @@ def create_app(config_class=Config):
     from app.cli import register_commands
     register_commands(app)
 
+    # Add database connection error handling
+    @app.before_request
+    def before_request():
+        try:
+            # Verify database connection
+            db.session.execute('SELECT 1')
+        except Exception as e:
+            app.logger.error(f"Database connection error: {e}")
+            db.session.rollback()
+            return "Database connection error. Please try again.", 500
+            
+    @app.teardown_request
+    def teardown_request(exception=None):
+        if exception:
+            db.session.rollback()
+        db.session.remove()
+
     return app 

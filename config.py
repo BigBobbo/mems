@@ -12,6 +12,15 @@ class Config:
     if SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
         SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ECHO = os.environ.get('FLASK_DEBUG') == '1'  # Log SQL in debug mode
+    
+    # Add database pool settings for better connection handling
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_size': 5,
+        'pool_recycle': 280,
+        'pool_timeout': 20,
+        'max_overflow': 2
+    }
     
     # File upload settings
     UPLOAD_FOLDER = os.path.join(basedir, 'app', 'static', 'uploads')
@@ -28,6 +37,13 @@ class Config:
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    
+    # Storage settings
+    USE_LOCAL_STORAGE = os.environ.get('USE_LOCAL_STORAGE', 'False') == 'True'
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    AWS_BUCKET_NAME = os.environ.get('AWS_BUCKET_NAME')
+    AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
 
 class TestConfig(Config):
     TESTING = True

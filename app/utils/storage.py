@@ -6,7 +6,11 @@ from flask import current_app, url_for
 
 class S3Storage:
     def __init__(self):
-        self.use_local = os.environ.get('USE_LOCAL_STORAGE') == 'True'
+        # Force S3 storage if running on Render
+        self.use_local = (
+            os.environ.get('USE_LOCAL_STORAGE') == 'True' and 
+            not os.environ.get('RENDER')
+        )
         
         if not self.use_local:
             self.s3 = boto3.client(
@@ -16,6 +20,11 @@ class S3Storage:
                 region_name=os.environ.get('AWS_REGION', 'us-east-1')
             )
             self.bucket = os.environ.get('AWS_BUCKET_NAME')
+            
+        # Create local upload directory for development
+        if self.use_local:
+            upload_dir = os.path.join(current_app.static_folder, 'uploads')
+            os.makedirs(upload_dir, exist_ok=True)
 
     def upload_file(self, file_obj, memorial_id, filename):
         """Upload a file to S3 or local storage"""

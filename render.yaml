@@ -17,15 +17,17 @@ services:
         fromDatabase:
           name: memorial-db
           property: connectionString
+      - key: USE_LOCAL_STORAGE
+        value: "False"
       - key: AWS_ACCESS_KEY_ID
         fromSecret: true
       - key: AWS_SECRET_ACCESS_KEY
         fromSecret: true
       - key: AWS_BUCKET_NAME
-        value: "your-bucket-name"
+        fromSecret: true
       - key: AWS_REGION
         value: "us-east-1"
 
 databases:
   - name: memorial-db
-    ipAllowList: [] 
+    ipAllowList: []  # This means the database accepts connections from all Render services 
