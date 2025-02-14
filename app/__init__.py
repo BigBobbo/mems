@@ -8,6 +8,7 @@ from app.utils.storage import S3Storage
 import os
 from sqlalchemy import exc
 import time
+from sqlalchemy import text
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -82,8 +83,8 @@ def create_app(config_class=Config):
         
         for attempt in range(max_retries):
             try:
-                # Test the connection
-                db.session.execute('SELECT 1')
+                # Test the connection with proper text() wrapper
+                db.session.execute(text('SELECT 1'))
                 return db.session
             except Exception as e:
                 app.logger.error(f"Database connection attempt {attempt + 1} failed: {e}")
