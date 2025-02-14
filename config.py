@@ -20,10 +20,7 @@ class Config:
         'pool_recycle': 280,  # Recycle connections before Render's 300s timeout
         'pool_timeout': 20,
         'max_overflow': 2,
-        'pool_pre_ping': True,  # Enable automatic reconnection
-        'connect_args': {
-            'options': '-c statement_timeout=10000'  # 10 second timeout
-        }
+        'pool_pre_ping': True  # Enable automatic reconnection
     }
     
     # For SQLite (development)
