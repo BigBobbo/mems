@@ -19,8 +19,9 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # Initialize storage
+    # Initialize storage with app context
     storage = S3Storage()
+    storage.init_app(app)
     
     # Make storage available in templates
     @app.context_processor

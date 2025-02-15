@@ -3,11 +3,18 @@ import os
 from werkzeug.utils import secure_filename
 from botocore.exceptions import ClientError
 from flask import current_app, url_for
+import logging
 
 class S3Storage:
     def __init__(self):
+        self.use_local = True  # Default to local storage
+        self.s3 = None
+        self.bucket = None
+        
+    def init_app(self, app):
+        """Initialize storage with Flask app context"""
         self.use_local = (
-            os.environ.get('USE_LOCAL_STORAGE') == 'True' and 
+            app.config.get('USE_LOCAL_STORAGE', 'False') == 'True' and 
             not os.environ.get('RENDER')
         )
         
@@ -17,8 +24,7 @@ class S3Storage:
             missing_vars = [var for var in required_vars if not os.environ.get(var)]
             
             if missing_vars:
-                current_app.logger.error(f"Missing required AWS credentials: {', '.join(missing_vars)}")
-                # Fall back to local storage if AWS creds are missing
+                app.logger.error(f"Missing required AWS credentials: {', '.join(missing_vars)}")
                 self.use_local = True
                 return
                 
@@ -32,16 +38,15 @@ class S3Storage:
                 # Test the connection
                 self.s3.list_buckets()
                 self.bucket = os.environ.get('AWS_BUCKET_NAME')
-                current_app.logger.info("Successfully connected to AWS S3")
+                app.logger.info("Successfully connected to AWS S3")
             except Exception as e:
-                current_app.logger.error(f"Failed to initialize S3 connection: {e}")
-                # Fall back to local storage if connection fails
+                app.logger.error(f"Failed to initialize S3 connection: {e}")
                 self.use_local = True
         
         # Create local upload directory for development or fallback
         if self.use_local:
-            current_app.logger.warning("Using local storage instead of S3")
-            upload_dir = os.path.join(current_app.static_folder, 'uploads')
+            app.logger.warning("Using local storage instead of S3")
+            upload_dir = os.path.join(app.static_folder, 'uploads')
             os.makedirs(upload_dir, exist_ok=True)
 
     def upload_file(self, file_obj, memorial_id, filename):
