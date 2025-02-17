@@ -46,11 +46,15 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     
     # Storage settings
-    USE_LOCAL_STORAGE = os.environ.get('USE_LOCAL_STORAGE', 'False') == 'True'
+    USE_LOCAL_STORAGE = os.environ.get('USE_LOCAL_STORAGE', 'False').lower() == 'true'
     AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
     AWS_BUCKET_NAME = os.environ.get('AWS_BUCKET_NAME')
     AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
+    
+    # Force S3 storage in production
+    if os.environ.get('RENDER'):
+        USE_LOCAL_STORAGE = False
 
 class TestConfig(Config):
     TESTING = True

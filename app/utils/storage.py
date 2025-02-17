@@ -13,39 +13,38 @@ class S3Storage:
         
     def init_app(self, app):
         """Initialize storage with Flask app context"""
-        self.use_local = (
-            app.config.get('USE_LOCAL_STORAGE', 'False') == 'True' and 
-            not os.environ.get('RENDER')
-        )
-        
+        # Force S3 in production
+        self.use_local = app.config.get('USE_LOCAL_STORAGE', False)
+        if os.environ.get('RENDER'):
+            self.use_local = False
+            
         if not self.use_local:
             # Verify AWS credentials are present
             required_vars = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_BUCKET_NAME']
-            missing_vars = [var for var in required_vars if not os.environ.get(var)]
+            missing_vars = [var for var in required_vars if not app.config.get(var)]
             
             if missing_vars:
                 app.logger.error(f"Missing required AWS credentials: {', '.join(missing_vars)}")
-                self.use_local = True
-                return
+                raise RuntimeError(f"Missing required AWS credentials: {', '.join(missing_vars)}")
                 
             try:
                 self.s3 = boto3.client(
                     's3',
-                    aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
-                    aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'),
-                    region_name=os.environ.get('AWS_REGION', 'us-east-1')
+                    aws_access_key_id=app.config['AWS_ACCESS_KEY_ID'],
+                    aws_secret_access_key=app.config['AWS_SECRET_ACCESS_KEY'],
+                    region_name=app.config['AWS_REGION']
                 )
                 # Test the connection
                 self.s3.list_buckets()
-                self.bucket = os.environ.get('AWS_BUCKET_NAME')
+                self.bucket = app.config['AWS_BUCKET_NAME']
                 app.logger.info("Successfully connected to AWS S3")
             except Exception as e:
                 app.logger.error(f"Failed to initialize S3 connection: {e}")
-                self.use_local = True
+                raise RuntimeError(f"Failed to initialize S3: {e}")
         
-        # Create local upload directory for development or fallback
+        # Create local upload directory for development
         if self.use_local:
-            app.logger.warning("Using local storage instead of S3")
+            app.logger.warning("Using local storage (development mode)")
             upload_dir = os.path.join(app.static_folder, 'uploads')
             os.makedirs(upload_dir, exist_ok=True)
 
