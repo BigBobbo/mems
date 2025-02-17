@@ -361,4 +361,31 @@ def upload_photo(id):
             
     return redirect(url_for('memorial.edit', id=id))
 
+@bp.route('/memorial/<int:id>/delete', methods=['POST'])
+@login_required
+def delete(id):
+    memorial = Memorial.query.get_or_404(id)
+    
+    # Check if user is authorized to delete
+    if current_user.id != memorial.creator_id:
+        abort(403)
+        
+    try:
+        # Delete associated photos from storage
+        for photo in memorial.photos:
+            storage.delete_file(memorial.id, photo.filename)
+            
+        # Delete from database
+        db.session.delete(memorial)
+        db.session.commit()
+        
+        flash('Memorial has been deleted.', 'success')
+        return redirect(url_for('memorial.index'))
+        
+    except Exception as e:
+        current_app.logger.error(f"Error deleting memorial: {e}")
+        db.session.rollback()
+        flash('An error occurred while deleting the memorial.', 'error')
+        return redirect(url_for('memorial.view', id=id))
+
 # Routes will be added here 
