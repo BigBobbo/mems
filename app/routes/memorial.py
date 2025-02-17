@@ -11,6 +11,7 @@ from app.utils.qr import generate_memorial_qr
 from app.models.theme import Theme
 from app.utils.storage import S3Storage
 from app.utils.db_monitor import monitor_db
+from slugify import slugify
 
 bp = Blueprint('memorial', __name__)
 
@@ -73,19 +74,25 @@ def create():
                 creator_id=current_user.id
             )
             
+            # Handle custom URL
             custom_url = request.form.get('custom_url')
             if custom_url:
-                if Memorial.query.filter_by(custom_url=custom_url).first():
+                if Memorial.query.filter_by(custom_url=slugify(custom_url)).first():
                     flash('Custom URL already taken')
                     return render_template('memorial/create.html')
-                memorial.custom_url = custom_url
-                
+                memorial.set_custom_url(custom_url)
+            else:
+                memorial.set_custom_url()
+            
             db.session.add(memorial)
             db.session.commit()
             flash('Memorial created successfully')
             return redirect(url_for('memorial.view', id=memorial.id))
-        except ValueError:
-            flash('Invalid date format')
+            
+        except Exception as e:
+            current_app.logger.error(f"Error creating memorial: {e}")
+            db.session.rollback()
+            flash('Error creating memorial')
             return render_template('memorial/create.html')
             
     return render_template('memorial/create.html')
@@ -100,6 +107,15 @@ def edit(id):
         return redirect(url_for('memorial.view', id=id))
         
     if request.method == 'POST':
+        custom_url = request.form.get('custom_url')
+        if custom_url:
+            slugified_url = slugify(custom_url)
+            existing = Memorial.query.filter_by(custom_url=slugified_url).first()
+            if existing and existing.id != memorial.id:
+                flash('Custom URL already taken')
+                return render_template('memorial/edit.html', memorial=memorial)
+            memorial.set_custom_url(custom_url)
+        
         memorial.name = request.form.get('name')
         memorial.birth_date = datetime.strptime(request.form.get('birth_date'), '%Y-%m-%d')
         memorial.death_date = datetime.strptime(request.form.get('death_date'), '%Y-%m-%d')
@@ -108,24 +124,18 @@ def edit(id):
         memorial.theme_id = request.form.get('theme_id', type=int)
         memorial.layout = request.form.get('layout', 'standard')
         
-        custom_url = request.form.get('custom_url')
-        if custom_url and custom_url != memorial.custom_url:
-            if Memorial.query.filter_by(custom_url=custom_url).first():
-                flash('Custom URL already taken')
-                return render_template('memorial/edit.html', memorial=memorial)
-            memorial.custom_url = custom_url
+        try:
+            db.session.commit()
+            flash('Memorial updated successfully')
+            return redirect(url_for('memorial.view', id=id))
+        except Exception as e:
+            current_app.logger.error(f"Error updating memorial: {e}")
+            db.session.rollback()
+            flash('Error updating memorial')
             
-        db.session.commit()
-        flash('Memorial updated successfully')
-        return redirect(url_for('memorial.view', id=id))
-    
-    # Get available themes and add debug logging    
-    themes = Theme.query.filter_by(is_active=True).all()
-    print(f"Available themes: {[t.name for t in themes]}")  # Debug log
-    
     return render_template('memorial/edit.html', 
-                         memorial=memorial, 
-                         themes=themes)
+                         memorial=memorial,
+                         themes=Theme.query.filter_by(is_active=True).all())
 
 @bp.route('/memorial/<int:id>/tribute', methods=['POST'])
 @login_required
@@ -387,5 +397,24 @@ def delete(id):
         db.session.rollback()
         flash('An error occurred while deleting the memorial.', 'error')
         return redirect(url_for('memorial.view', id=id))
+
+# Add a route to handle custom URLs
+@bp.route('/m/<custom_url>')
+def view_by_url(custom_url):
+    memorial = Memorial.query.filter_by(custom_url=custom_url).first_or_404()
+    if not memorial.is_public and (not current_user.is_authenticated or current_user.id != memorial.creator_id):
+        abort(403)
+    
+    # Use theme-specific template if available, otherwise use classic theme
+    if memorial.theme:
+        print(f"Using theme template: {memorial.theme.template_path}")
+        template = memorial.theme.template_path
+    else:
+        print("Using default classic theme")
+        template = 'themes/classic/memorial.html'
+        
+    return render_template(template, 
+                         memorial=memorial, 
+                         now=datetime.utcnow())
 
 # Routes will be added here 

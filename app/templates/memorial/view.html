@@ -14,21 +14,29 @@
         </div>
         {% if current_user.is_authenticated and current_user.id == memorial.creator_id %}
         <div class="col-md-4 text-end">
-            <a href="{{ url_for('memorial.edit', id=memorial.id) }}" class="btn btn-secondary">
-                <i class="fas fa-edit"></i> Edit Memorial
-            </a>
-            <a href="{{ url_for('memorial.manage_tributes', id=memorial.id) }}" 
-               class="btn btn-outline-secondary">Manage Tributes</a>
-            <a href="{{ url_for('memorial.manage_photos', id=memorial.id) }}" 
-               class="btn btn-outline-secondary">Manage Photos</a>
-            <a href="{{ url_for('event.list_events', memorial_id=memorial.id) }}" 
-               class="btn btn-outline-secondary">Manage Events</a>
-            <a href="{{ url_for('memorial.generate_qr', id=memorial.id) }}" 
-               class="btn btn-outline-secondary">
-                <i class="fas fa-qrcode"></i> QR Code
-            </a>
-            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                <i class="fas fa-trash"></i> Delete Memorial
+            <div class="btn-group">
+                <a href="{{ url_for('memorial.edit', id=memorial.id) }}" class="btn btn-secondary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{{ url_for('memorial.manage_photos', id=memorial.id) }}" 
+                   class="btn btn-outline-secondary">
+                    <i class="fas fa-images"></i> Photos
+                </a>
+                <a href="{{ url_for('memorial.manage_tributes', id=memorial.id) }}" 
+                   class="btn btn-outline-secondary">
+                    <i class="fas fa-comments"></i> Tributes
+                </a>
+                <a href="{{ url_for('event.list_events', memorial_id=memorial.id) }}" 
+                   class="btn btn-outline-secondary">
+                    <i class="fas fa-calendar"></i> Events
+                </a>
+                <a href="{{ url_for('memorial.generate_qr', id=memorial.id) }}" 
+                   class="btn btn-outline-secondary">
+                    <i class="fas fa-qrcode"></i> QR
+                </a>
+            </div>
+            <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fas fa-trash"></i> Delete
             </button>
         </div>
         {% endif %}
